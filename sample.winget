@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+properties:
+  configurationVersion: "0.2.0"
+  # Assertions call a resource provider's 'test' function. They will never call a 'set' function.
+  # If any assertion fails, the entire winget DSC will be prevented from running.
+  assertions:
+    # https://github.com/microsoft/winget-dsc/tree/main/resources/Microsoft.Windows.Developer
+    - resource: Microsoft.Windows.Developer/OsVersion
+      directives:
+        description: Verify running 23H2 or higher
+        allowPrerelease: true # This is related to the Microsoft.Windows.Developer module itself
+      settings:
+        MinVersion: "10.0.22631" # Specify we want at least version 23H2
+
+  # Resources first call the 'test' function to check what state they're in.
+  # If the test returns TRUE, then the resource is considered successfully applied, and DSC will continue.
+  # If the test returns FALSE, then the 'set' function will be called, followed by another call to the 'test' function.
+  resources:
+    # Use PowerShell scripts to create a folder at C:\Dev because the 'File' resource provider no longer exists
+    # Manual scripts are generally not recommended in DSC, and should only be used if an existing provider does not exist (and you don't have the time/effort to write one yourself...)
+    - resource: PSDscResources/Script # https://github.com/PowerShell/PSDscResources/tree/dev/DscResources/MSFT_ScriptResource
+      id: script-create-devfolder # ID helps with identifying this resource in the output. This can be whatever, but it might help to standardise if you're doing a lot.
+      directives:
+        description: Create C:\Dev Folder # A description of the desired state/outcome
+        securityContext: elevated # Whether or not admin permissions are required
+      settings: # The required/available settings will depend on the schema of the resource provider.
+        GetScript: Get-Item "C:\Dev"
+        TestScript: Test-Path "C:\Dev"
+        SetScript: New-Item -ItemType Directory -Force -Path C:\Dev
+
+    # Use Winget DSC to install Rust
+    - resource: Microsoft.WinGet.DSC/WinGetPackage # https://github.com/microsoft/winget-cli/tree/master/src/PowerShell/Microsoft.WinGet.DSC
+      id: winget-install-rust
+      directives:
+        description: Install Rust language
+        securityContext: elevated # Not all installers will automatically self-elevate. It's recommended to set this if you know admin permissions are required.
+      settings: # Completely different settings to previous
+        source: winget # Specify to install from the winget source
+        id: Rustlang.Rust.MSVC # the ID of the package to install
+
+    # Use a PowerShell script to install bacon via cargo
+    # Will only run if Rust is installed
+    - resource: xPSDesiredStateConfiguration/xScript # https://github.com/dsccommunity/xPSDesiredStateConfiguration
+      id: script-cargo-install-bacon
+      directives:
+        description: Install bacon using cargo
+      dependsOn:
+        - winget-install-rust # Ensure Rust is installed before even attempting this
+      settings:
+        # Terrible example just for demonstrating multi-line scripts
+        GetScript: |
+          $packageName = "bacon"
+          $cargoOutput = cargo install --list 
+          $result = ($cargoOutput | Select-String -Pattern "^($packageName\sv.*):$").matches.groups[1].value
+          return @{
+            Result = $result
+          }
+        TestScript: '[bool]((cargo install --list) -match "^bacon\sv.*:$")' # Script are just strings and can be quoted if necessary
+        SetScript: cargo install bacon -q # or they can have no quotes at all
+
+    # Install chocolatey itself
+    - resource: cChoco/cChocoInstaller # https://github.com/chocolatey/cChoco/tree/development/DSCResources/cChocoInstaller
+      id: choco-install-chocolatey
+      directives:
+        description: Install Chocolatey
+        securityContext: elevated
+      settings:
+        InstallDir: "C:\\ProgramData\\chocolatey" # This is a required setting, but you can set wherever
+
+    # Install ripgrep-all(ripgrep-all) using chocolatey
+    - resource: cChoco/cChocoPackageInstaller # https://github.com/chocolatey/cChoco/tree/development/DSCResources/cChocoPackageInstaller
+      id: choco-install-ripgrep-all
+      directives:
+        description: Install ripgrep-all (rga) using chocolatey
+        securityContext: elevated
+      dependsOn:
+        - choco-install-chocolatey # make sure that chocolatey is installed first
+      settings:
+        Name: ripgrep-all # Name of the chocolatey community package

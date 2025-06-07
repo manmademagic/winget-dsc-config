@@ -1,0 +1,862 @@
+# yaml-language-server: $schema=https://aka.ms/configuration-dsc-schema/0.2
+
+properties:
+  configurationVersion: "0.2.0"
+
+  assertions:
+    - resource: Microsoft.Windows.Developer/OsVersion
+      directives:
+        description: Verify running 23H2 or higher
+        allowPrerelease: true
+      settings:
+        MinVersion: "10.0.22631" # version 23H2
+
+  resources:
+    #========== Section: Customise Windows Settings ==========
+    - resource: Microsoft.Windows.Settings/WindowsSettings
+      id: windowssettings-apply-settings
+      directives:
+        description: Modify windows settings
+        allowPrerelease: true
+      settings:
+        SystemColorMode: Dark
+        AppColorMode: Light
+        RestartExplorer: True
+
+    - resource: Microsoft.Windows.Developer/Taskbar
+      id: taskbar-apply-settings
+      directives:
+        description: Modify taskbar settings
+        allowPrerelease: true
+      settings:
+        Alignment: Left
+        HideLabelsMode: WhenFull
+        SearchBoxMode: Hide
+        TaskViewButton: Show
+        WidgetsButton: Hide
+        RestartExplorer: True
+
+    - resource: Microsoft.Windows.Developer/WindowsExplorer
+      id: explorer-apply-settings
+      directives:
+        description: Modify Windows Explorer settings
+        allowPrerelease: true
+      settings:
+        FileExtensions: Show
+        HiddenFiles: Show
+        ItemCheckBoxes: Hide
+        RestartExplorer: True
+
+    - resource: xPSDesiredStateConfiguration/xScript
+      id: script-createTempFolder
+      directives:
+        description: Create c:\temp folder
+        securityContext: elevated
+      settings:
+        GetScript: 'Get-Item "C:\Temp"'
+        TestScript: 'Test-Path "C:\Temp"'
+        SetScript: 'New-Item -ItemType Directory -Force -Path C:\Temp'
+
+    - resource: xPSDesiredStateConfiguration/xScript
+      id: script-createDevFolder
+      directives:
+        description: Create a c:\dev folder
+        securityContext: elevated
+      settings:
+        GetScript: 'Get-Item "C:\Dev"'
+        TestScript: 'Test-Path "C:\Dev"'
+        SetScript: 'New-Item -ItemType Directory -Force -Path C:\Dev'
+
+    #========== Section: High Priority Utils ==========
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-powershell
+      directives:
+        description: Install PowerShell
+        securityContext: elevated
+      settings:
+        source: winget
+        id: Microsoft.PowerShell
+        ensure: Present
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-dsc
+      directives:
+        description: Install Desired State Configuration
+        securityContext: elevated
+      settings:
+        source: msstore
+        id: 9NVTPZWRC6KQ
+        ensure: Present
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-1password
+      directives:
+        description: Install 1Password
+      settings:
+        source: winget
+        id: AgileBits.1Password
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-dopus
+      directives:
+        description: Install Directory Opus
+      settings:
+        source: winget
+        id: GPSoftware.DirectoryOpus
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-notepadplusplus
+      directives:
+        description: Install Notepad++
+      settings:
+        source: winget
+        id: Notepad++.Notepad++
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-7zip
+      directives:
+        description: Install 7-Zip
+      settings:
+        source: winget
+        id: 7zip.7zip
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-powertoys
+      directives:
+        description: Install PowerToys
+      settings:
+        source: winget
+        id: Microsoft.PowerToys
+
+    # Currently disabled it fails to install
+    # - resource: Microsoft.WinGet.DSC/WinGetPackage
+    # id: winget-install-sharex
+    # directives:
+    # description: Install ShareX
+    # settings:
+    # source: winget
+    # id: ShareX.ShareX
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-tailscale
+      directives:
+        description: Install Tailscale
+      settings:
+        source: winget
+        id: Tailscale.Tailscale
+
+    # https://www.autohotkey.com
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-ahk
+      directives:
+        description: Install AutoHotkey
+      settings:
+        source: winget
+        id: AutoHotkey.AutoHotkey
+
+    #========== Section: Programming Languages ==========
+    # https://www.rust-lang.org
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-rust
+      directives:
+        description: Install Rust
+      settings:
+        source: winget
+        id: Rustlang.Rust.MSVC
+
+    # https://typst.app/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-typst
+      directives:
+        description: Install Typst
+      settings:
+        source: winget
+        id: Typst.Typst
+
+    # https://www.python.org/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-python
+      directives:
+        description: Install Python 3.10
+      settings:
+        source: winget
+        id: Python.Python.3.10
+
+    # https://github.com/coreybutler/nvm-windows
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-nvm
+      directives:
+        description: Install NVM for Windows
+        securityContext: elevated
+      settings:
+        id: CoreyButler.NVMforWindows
+        source: winget
+
+    #========== Section: High Priority Apps ==========
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-chrome
+      directives:
+        description: Install Google Chrome
+      settings:
+        source: winget
+        id: Google.Chrome
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-firefox
+      directives:
+        description: Install Mozilla Firefox
+      settings:
+        source: winget
+        id: Mozilla.Firefox
+
+    #========== Section: High Priority Dev Tools ==========
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-git
+      directives:
+        description: Install Git
+        securityContext: elevated
+      settings:
+        source: winget
+        id: Git.Git
+        Ensure: Present
+
+    # https://cli.github.com/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-github-cli
+      directives:
+        description: Install GitHub CLI
+        securityContext: elevated
+      dependsOn:
+        - winget-install-git
+      settings:
+        source: winget
+        id: GitHub.cli
+        ensure: Present
+
+    # https://code.visualstudio.com/insiders/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-vscode-insiders
+      directives:
+        description: Install Visual Studio Code = Insiders
+      settings:
+        source: winget
+        id: Microsoft.VisualStudioCode.Insiders
+
+    # https://www.vim.org/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-vim
+      directives:
+        description: Install vim
+      settings:
+        source: winget
+        id: vim.vim
+
+    # https://neovim.io/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-neovim
+      directives:
+        description: Install Neovim
+      settings:
+        source: winget
+        id: Neovim.Neovim
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-neovim-qt
+      directives:
+        description: Install Neovim Qt
+      settings:
+        source: winget
+        id: equalsraf.neovim-qt
+
+    # https://www.gnu.org/software/emacs/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-emacs
+      directives:
+        description: Install emacs
+        securityContext: elevated
+      settings:
+        source: winget
+        id: GNU.emacs
+
+    # https://obsidian.md/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-obsidian
+      directives:
+        description: Install Obsidian
+      settings:
+        source: winget
+        id: Obsidian.Obsidian
+
+    # https://github.com/BurntSushi/ripgrep
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-ripgrep
+      directives:
+        description: Install ripgrep
+      settings:
+        source: winget
+        id: BurntSushi.ripgrep.MSVC
+
+    #========== Section: Low Priority Apps ==========
+    # https://devolutions.net/remote-desktop-manager/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-remotedesktopmanager
+      directives:
+        description: Install Remote Desktop Manager
+      settings:
+        source: winget
+        id: Devolutions.RemoteDesktopManager
+
+    # https://www.notion.so
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-notion
+      directives:
+        description: Install Notion
+      settings:
+        source: winget
+        id: Notion.Notion
+
+    # https://discord.com/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-discord
+      directives:
+        description: Install Discord
+      settings:
+        source: winget
+        id: Discord.Discord
+
+    # https://www.plex.tv/plexamp/
+    # Plex's standalone music player
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-plexamp
+      directives:
+        description: Install Plexamp
+      settings:
+        source: winget
+        id: Plex.Plexamp
+
+    # https://www.videolan.org/vlc/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-vlc
+      directives:
+        description: Install VLC
+        securityContext: elevated
+      settings:
+        source: winget
+        id: VideoLAN.VLC
+
+    # https://www.blender.org
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-blender
+      directives:
+        description: Install Blender
+      settings:
+        source: winget
+        id: BlenderFoundation.Blender
+
+    # https://store.steampowered.com/about/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-steam
+      directives:
+        description: Install Steam
+      settings:
+        source: winget
+        id: Valve.Steam
+
+    #========== Section: Low Priority Utils ==========
+    # Espanso - https://github.com/espanso/espanso
+    # Cross-platform text-expander
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-espanso
+      directives:
+        description: Install Espanso
+      settings:
+        source: winget
+        id: Espanso.Espanso
+
+    # starship - https://starship.rs
+    # Minimal shell prompt
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-starship
+      directives:
+        description: Install Starship
+      settings:
+        source: winget
+        id: Starship.Starship
+
+    # https://www.manictime.com/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-manictime
+      directives:
+        description: Install ManicTime
+      settings:
+        source: winget
+        id: ManicTime.ManicTime
+
+    # https://github.com/Belphemur/SoundSwitch
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-soundswitch
+      directives:
+        description: Install SoundSwitch
+      settings:
+        source: winget
+        id: AntoineAflalo.SoundSwitch
+
+    # https://diskanalyzer.com/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-wiztree
+      directives:
+        description: Install WizTree
+      settings:
+        source: winget
+        id: AntibodySoftware.WizTree
+
+    # https://www.voidtools.com
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-everything
+      directives:
+        description: Install Everything
+        securityContext: elevated
+      settings:
+        source: winget
+        id: voidtools.Everything
+
+    # https://justgetflux.com
+    # Automatically adjust monitor colour temperature based on the time of day
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-flux
+      directives:
+        description: Install F.lux
+      settings:
+        source: winget
+        id: flux.flux
+
+    #========== Section: Low Priority Dev Tools ==========
+    # https://httpie.io
+    # API testing client for REST, GraphQL, and HTTP APIs
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-httpie
+      directives:
+        description: Install HTTPie
+      settings:
+        source: winget
+        id: HTTPie.HTTPie
+
+    # fd - https://github.com/sharkdp/fd
+    # A simple, fast and user-friendly alternative to 'find'
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-fd
+      directives:
+        description: Install fd
+      settings:
+        source: winget
+        id: sharkdp.fd
+
+    # eza - https://github.com/eza-community/eza
+    # A modern alternative to ls
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-eza
+      directives:
+        description: Install eza
+      settings:
+        source: winget
+        id: eza-community.eza
+
+    # hyperfine - https://github.com/sharkdp/hyperfine
+    # A command-line benchmarking tool
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-hyperfine
+      directives:
+        description: Install hyperfine
+      settings:
+        source: winget
+        id: sharkdp.hyperfine
+
+    # bat - https://github.com/sharkdp/bat
+    # A cat(1) clone with wings
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-bat
+      directives:
+        description: Install bat
+      settings:
+        source: winget
+        id: sharkdp.bat
+
+    # hexyl - https://github.com/sharkdp/hexyl
+    # A command-line hex viewer
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-hexyl
+      directives:
+        description: Install hexyl
+      settings:
+        source: winget
+        id: sharkdp.hexyl
+
+    # pastel - https://github.com/sharkdp/pastel
+    # A command-line tool to generate, analyze, convert and manipulate colors
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-pastel
+      directives:
+        description: Install pastel
+      settings:
+        source: winget
+        id: sharkdp.pastel
+
+    # du - https://github.com/bootandy/dust
+    # A more intuitive version of du
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-dust
+      directives:
+        description: Install dust
+      settings:
+        source: winget
+        id: bootandy.dust
+
+    # uutils coreutils- https://github.com/uutils/coreutils
+    # Rust version of GNU coreutils
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-coreutils
+      directives:
+        description: Install coreutils
+      settings:
+        source: winget
+        id: uutils.coreutils
+
+    # yazi - https://github.com/sxyazi/yazi
+    # Blazing fast terminal file manager written in Rust, based on async I/O
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-yazi
+      directives:
+        description: Install Yazi
+      settings:
+        source: winget
+        id: sxyazi.yazi
+
+    # https://github.com/jellyfin/jellyfin-ffmpeg
+    # JellyFin's version of ffmpeg
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-ffmpeg
+      directives:
+        description: Install Jellyfin FFmpeg
+      settings:
+        source: winget
+        id: Jellyfin.FFmpeg
+
+    # fzf - https://github.com/junegunn/fzf
+    # A command-line fuzzy finder
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-fzf
+      directives:
+        description: Install fzf
+      settings:
+        source: winget
+        id: junegunn.fzf
+
+    # LLVM - https://llvm.org/
+    # LLVM Compiler Infrastructure
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-llvm
+      directives:
+        description: Install LLVM
+      settings:
+        source: winget
+        id: LLVM.LLVM
+
+    # fselect - https://github.com/jhspetersson/fselect
+    # Find files with SQL-like queries
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-fselect
+      directives:
+        description: Install fselect
+      settings:
+        source: winget
+        id: fselect.fselect
+
+    # delta - https://github.com/dandavison/delta
+    # Syntax-highlighting pager for git, diff, grep, and blame
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-delta
+      directives:
+        description: Install Delta
+      settings:
+        source: winget
+        id: dandavison.delta
+
+    # tokei - https://github.com/XAMPPRocky/tokei
+    # Count your code, quickly
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-tokei
+      directives:
+        description: Install Tokei
+      settings:
+        source: winget
+        id: XAMPPRocky.Tokei
+
+    # Just - https://github.com/casey/just
+    # Just a command runner
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-just
+      directives:
+        description: Install Just
+      settings:
+        source: winget
+        id: Casey.Just
+
+    # presenterm - https://github.com/mfontanini/presenterm
+    # A markdown terminal slideshow tool
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-presenterm
+      directives:
+        description: Install presenterm
+      settings:
+        source: winget
+        id: mfontanini.presenterm
+
+    #========== Section: Nirsoft & Sysinternals Tools==========
+    # https://learn.microsoft.com/en-us/sysinternals/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-sysinternals
+      directives:
+        description: Install Sysinternals
+      settings:
+        source: winget
+        id: Microsoft.Sysinternals
+
+    # https://www.nirsoft.net/
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-networkusageview
+      directives:
+        description: Install NetworkUsageView
+      settings:
+        source: winget
+        id: NirSoft.NetworkUsageView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-installedpackagesview
+      directives:
+        description: Install InstalledPackagesView
+      settings:
+        source: winget
+        id: NirSoft.InstalledPackagesView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-resourcesextract
+      directives:
+        description: Install ResourcesExtract
+      settings:
+        source: winget
+        id: NirSoft.ResourcesExtract
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-advancedrun
+      directives:
+        description: Install AdvancedRun
+      settings:
+        source: winget
+        id: NirSoft.AdvancedRun
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-openedfilesview
+      directives:
+        description: Install OpenedFilesView
+      settings:
+        source: winget
+        id: NirSoft.OpenedFilesView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-tcplogview
+      directives:
+        description: Install TcpLogView
+      settings:
+        source: winget
+        id: NirSoft.TcpLogView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-networkinterfacesview
+      directives:
+        description: Install NetworkInterfacesView
+      settings:
+        source: winget
+        id: NirSoft.NetworkInterfacesView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-guipropview
+      directives:
+        description: Install GUIPropView
+      settings:
+        source: winget
+        id: NirSoft.GUIPropView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-netrouteview
+      directives:
+        description: Install NetRouteView
+      settings:
+        source: winget
+        id: NirSoft.NetRouteView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-simpleprogramdebugger
+      directives:
+        description: Install SimpleProgramDebugger
+      settings:
+        source: winget
+        id: NirSoft.SimpleProgramDebugger
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-bluescreenview
+      directives:
+        description: Install BlueScreenView
+      settings:
+        source: winget
+        id: NirSoft.BlueScreenView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-appcrashview
+      directives:
+        description: Install AppCrashView
+      settings:
+        source: winget
+        id: NirSoft.AppCrashView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-installeddriverslist
+      directives:
+        description: Install InstalledDriversView
+      settings:
+        source: winget
+        id: NirSoft.InstalledDriversList
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-usblogview
+      directives:
+        description: Install USBLogView
+      settings:
+        source: winget
+        id: NirSoft.USBLogView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-wifiinfoview
+      directives:
+        description: Install WifiInfoView
+      settings:
+        source: winget
+        id: NirSoft.WifiInfoView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-uninstallview
+      directives:
+        description: Install UninstallView
+      settings:
+        source: winget
+        id: NirSoft.UninstallView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-soundvolumeview
+      directives:
+        description: Install SoundVolumeView
+      settings:
+        source: winget
+        id: NirSoft.SoundVolumeView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-whatishang
+      directives:
+        description: Install WhatIsHang
+      settings:
+        source: winget
+        id: NirSoft.WhatIsHang
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-dnslookupview
+      directives:
+        description: Install DNSLookupView
+      settings:
+        source: winget
+        id: NirSoft.DNSLookupView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-shellexview
+      directives:
+        description: Install ShellExView
+      settings:
+        source: winget
+        id: NirSoft.ShellExView
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-ipnetinfo
+      directives:
+        description: Install IPNetInfo
+      settings:
+        source: winget
+        id: NirSoft.IPNetInfo
+
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-wirelessnetworkwatcher
+      directives:
+        description: Install WirelessNetworkWatcher
+      settings:
+        source: winget
+        id: NirSoft.WirelessNetworkWatcher
+
+    #========== Section: Chocolatey Packages ==========
+    # Chocolatey installation - https://github.com/chocolatey/cChoco
+    # https://community.chocolatey.org/
+    - resource: cChoco/cChocoInstaller
+      id: choco-install-chocolatey
+      directives:
+        description: Install Chocolatey
+        securityContext: elevated
+      settings:
+        InstallDir: "C:\\ProgramData\\chocolatey"
+
+    # ripgrep-all - https://github.com/phiresky/ripgrep-all
+    # rga: ripgrep, but also search in PDFs, E-Books, Office documents, zip, tar.gz, etc.
+    - resource: cChoco/cChocoPackageInstaller
+      id: choco-install-ripgrep-all
+      directives:
+        description: Install ripgrep-all (rga) using chocolatey
+        securityContext: elevated
+      dependsOn:
+        - choco-install-chocolatey
+      settings:
+        Name: ripgrep-all # rga: ripgrep, but also search in PDFs, E-Books, Office documents, zip, tar.gz, etc - https://github.com/phiresky/ripgrep-all
+
+    #========== Section: Cargo Installs using Manual Scripts ==========
+    # cargo-info -  https://gitlab.com/imp/cargo-info
+    # Extends cargo info to show crates info from crates.io
+    - resource: xPSDesiredStateConfiguration/xScript
+      id: script-cargo-install-cargo-info
+      directives:
+        description: Install cargo-info using cargo
+      dependsOn:
+        - winget-install-rust
+      settings:
+        GetScript: '@{Result = [string](cargo install --list | % {$_ -match "^cargo-info\sv.*:" ? $_ -replace ":$":""})}'
+        TestScript: '[bool]((cargo install --list) -match "^cargo-info\sv.*:$")'
+        SetScript: "cargo install cargo-info -q" # Needs to be a quiet install otherwise the output will get detected as a failure
+
+    # bacon - https://github.com/Canop/bacon
+    # background code checker for rust
+    - resource: xPSDesiredStateConfiguration/xScript
+      id: script-cargo-install-bacon
+      directives:
+        description: Install bacon using cargo
+      dependsOn:
+        - winget-install-rust
+      settings:
+        GetScript: '@{Result = [string](cargo install --list | % {$_ -match "^bacon\sv.*:" ? $_ -replace ":$":""})}'
+        TestScript: '[bool]((cargo install --list) -match "^bacon\sv.*:$")'
+        SetScript: "cargo install bacon -q"
+
+    # mask - https://github.com/jacobdeichert/mask
+    # CLI task runner defined by simple markdown files
+    - resource: xPSDesiredStateConfiguration/xScript
+      id: script-cargo-install-mask
+      directives:
+        description: Install mask using cargo
+      dependsOn:
+        - winget-install-rust
+      settings:
+        GetScript: '@{Result = [string](cargo install --list | % {$_ -match "^mask\sv.*:" ? $_ -replace ":$":""})}'
+        TestScript: '[bool]((cargo install --list) -match "^mask\sv.*:$")'
+        SetScript: "cargo install mask -q"
