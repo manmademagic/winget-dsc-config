@@ -306,6 +306,16 @@ properties:
         source: winget
         id: Devolutions.RemoteDesktopManager
 
+    # Zeal Docs - https://github.com/zealdocs/zeal
+    # Cross platform alternative to OSX's Dash docs
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-zeal
+      directives:
+        description: Install Zeal Docs
+      settings:
+        source: winget
+        id: OlegShparber.Zeal
+
     # https://www.notion.so
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: winget-install-notion
