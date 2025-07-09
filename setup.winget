@@ -363,6 +363,15 @@ properties:
         source: winget
         id: BlenderFoundation.Blender
 
+    # https://inkscape.org
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-inkscape
+      directives:
+        description: Install Inkscape
+      settings:
+        source: winget
+        id: Inkscape.Inkscape
+
     # https://store.steampowered.com/about/
     - resource: Microsoft.WinGet.DSC/WinGetPackage
       id: winget-install-steam
@@ -371,6 +380,16 @@ properties:
       settings:
         source: winget
         id: Valve.Steam
+
+    # https://www.adobe.com/au/acrobat/pdf-reader.html
+    # As much as I detest it, I do need it occasionally
+    - resource: Microsoft.WinGet.DSC/WinGetPackage
+      id: winget-install-acrobat-reader
+      directives:
+        description: Install Acrobat Reader
+      settings:
+        source: winget
+        id: Adobe.Acrobat.Reader.64-bit
 
     #========== Section: Low Priority Utils ==========
     # Espanso - https://github.com/espanso/espanso
